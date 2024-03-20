@@ -12,42 +12,68 @@ class QuestionAnswerPage extends StatefulWidget {
 }
 
 class _QuestionAnswerPageState extends State<QuestionAnswerPage> {
-  int currentScore = 0;
-  int currentQuestionIndex = 0;
-  late List<Question> questions = GlobalQuestions.questions;
-  bool answered = false;
-  late String selectedAnswer;
-  Timer? _timer;
-  final QuizService _quizService = QuizService();
+  int currentScore = 0; // Variable to track the current score
+  int currentQuestionIndex = 0; // Variable to track the index of the current question
+  late List<Question> questions = GlobalQuestions.questions; // List of questions in the quiz
+  bool answered = false; // Flag to indicate if the question has been answered
+  late String selectedAnswer; // Variable to store the selected answer
+  Timer? _timer; // Timer for tracking time left to answer each question
+  final QuizService _quizService = QuizService(); // Service for managing quiz-related operations
+  int _timeLeft = 10; // Time limit for answering each question in seconds
+  bool _timeExpired = false; // Flag to indicate if the time limit has expired
 
   @override
   void initState() {
     super.initState();
+    _startTimer(); // Start the timer when the page is initialized
   }
 
+  /// Starts the timer for each question, reducing the time left by 1 second every second.
+  void _startTimer() {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      setState(() {
+        if (_timeLeft > 0) {
+          _timeLeft--;
+        } else {
+          _timer!.cancel();
+          _timeExpired = true;
+          _answerQuestion(''); // Consider unanswered question as incorrect when time expires
+        }
+      });
+    });
+  }
+
+  /// Handles the user's answer to the question.
   void _answerQuestion(String answer) {
-    if (answered) return;
+    if (answered || _timeExpired) return; // Do nothing if the question is already answered or time has expired
 
     setState(() {
-      answered = true;
-      selectedAnswer = answer;
+      answered = true; // Mark the question as answered
+      selectedAnswer = answer; // Store the selected answer
+      // Check if the selected answer is correct and update the score accordingly
       if (questions[currentQuestionIndex].correctAnswer == answer) {
         currentScore += questions[currentQuestionIndex].score;
       }
     });
 
-    _timer = Timer(Duration(seconds: 2), () {
+    _timer?.cancel(); // Cancel the timer when the question is answered
+
+    _timer = Timer(const Duration(seconds: 2), () {
       if (currentQuestionIndex < questions.length - 1) {
         setState(() {
-          currentQuestionIndex++;
-          answered = false;
+          currentQuestionIndex++; // Move to the next question
+          answered = false; // Reset the answered flag for the next question
+          _timeLeft = 10; // Reset the time left for answering the next question
+          _timeExpired = false; // Reset the timeExpired flag for the next question
         });
+        _startTimer(); // Start the timer for the next question
       } else {
-        _updateHighScore();
+        _updateHighScore(); // Update the high score and navigate back to the main menu when all questions are answered
       }
     });
   }
 
+  /// Updates the high score if the current score is higher and navigates back to the main menu.
   void _updateHighScore() async {
     final prefs = await SharedPreferences.getInstance();
     int highScore = (prefs.getInt('highScore') ?? 0);
@@ -59,23 +85,23 @@ class _QuestionAnswerPageState extends State<QuestionAnswerPage> {
 
   @override
   void dispose() {
-    _timer?.cancel();
+    _timer?.cancel(); // Cancel the timer when the page is disposed
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    Question currentQuestion = questions[currentQuestionIndex];
+    Question currentQuestion = questions[currentQuestionIndex]; // Get the current question
     return Scaffold(
-      backgroundColor: Colors.blue.shade700,
+      backgroundColor: Colors.blue.shade700, // Set background color
       appBar: AppBar(
-        backgroundColor: Colors.blue.shade900,
-        iconTheme: IconThemeData(color: Colors.white),  // Set back button color to white
-        title: Center(child: Text('Question ${currentQuestionIndex + 1} of ${questions.length}', style: TextStyle(color: Colors.white),)),
+        backgroundColor: Colors.blue.shade900, // Set app bar color
+        iconTheme: const IconThemeData(color: Colors.white),  // Set back button color to white
+        title: Center(child: Text('Question ${currentQuestionIndex + 1} of ${questions.length}', style: const TextStyle(color: Colors.white),)), // Display current question number
         actions: <Widget>[
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12.0),
-            child: Center(child: Text('Score: $currentScore', style: TextStyle(fontSize: 16, color: Colors.yellowAccent),)),
+            child: Center(child: Text('Score: $currentScore', style: const TextStyle(fontSize: 16, color: Colors.yellowAccent),)), // Display current score
           ),
         ],
       ),
@@ -84,7 +110,7 @@ class _QuestionAnswerPageState extends State<QuestionAnswerPage> {
           padding: const EdgeInsets.all(12.0),
           child: Card(
             elevation: 8.0,
-            color: Colors.blue.shade800,
+            color: Colors.blue.shade900,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12.0),
             ),
@@ -93,7 +119,7 @@ class _QuestionAnswerPageState extends State<QuestionAnswerPage> {
               children: <Widget>[
                 if (currentQuestion.questionImageUrl != null)
                   ClipRRect(
-                    borderRadius: BorderRadius.only(
+                    borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(16.0),
                       topRight: Radius.circular(16.0),
                     ),
@@ -108,8 +134,8 @@ class _QuestionAnswerPageState extends State<QuestionAnswerPage> {
                   padding: const EdgeInsets.all(16.0),
                   child: Table(
                     columnWidths: {
-                      0: FlexColumnWidth(3),
-                      1: FlexColumnWidth(1),
+                      0: const FlexColumnWidth(3),
+                      1: const FlexColumnWidth(1),
                     },
                     children: [
                       TableRow(
@@ -118,7 +144,7 @@ class _QuestionAnswerPageState extends State<QuestionAnswerPage> {
                             padding: const EdgeInsets.symmetric(vertical: 8.0),
                             child: Text(
                               currentQuestion.questionText,
-                              style: TextStyle(
+                              style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 20.0,
                                 fontWeight: FontWeight.bold,
@@ -130,7 +156,7 @@ class _QuestionAnswerPageState extends State<QuestionAnswerPage> {
                             child: Text(
                               'Score\n${currentQuestion.score}',
                               textAlign: TextAlign.right,
-                              style: TextStyle(
+                              style: const TextStyle(
                                 color: Colors.yellow,
                                 fontSize: 16.0,
                               ),
@@ -142,38 +168,43 @@ class _QuestionAnswerPageState extends State<QuestionAnswerPage> {
                   ),
                 ),
 
-                Divider(height: 0),
-                SizedBox(height: 10),
+                const Divider(height: 0),
+                const SizedBox(height: 10),
                 ...currentQuestion.answers.keys.map((answer) {
                   return Container(
-                    // padding: EdgeInsets.all(0),
-                    margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(color: Colors.white.withOpacity(0.5)),
-                      color: answered
+                      color: answered  ///controlling answer based on user answer selection
                           ? (answer == selectedAnswer
                           ? (answer == currentQuestion.correctAnswer ? Colors.green.withOpacity(0.7) : Colors.red.withOpacity(0.7))
                           : (answer == currentQuestion.correctAnswer ? Colors.green.withOpacity(0.7) : null))
-                          : Colors.blue.shade900,
+                          : Colors.blue.shade800,
                     ),
                     child: ListTile(
                       title: Center(
                         child: Text(
                           currentQuestion.answers[answer]!,
-                          style: TextStyle(color: Colors.white, fontSize: 20),
+                          style: const TextStyle(color: Colors.white, fontSize: 20),
                         ),
                       ),
                       onTap: () => _answerQuestion(answer),
                     ),
                   );
 
-                }).toList()..shuffle(),
+                }).toList(),
               ],
             ),
           ),
         ),
       ),
+      bottomNavigationBar: LinearProgressIndicator(
+        backgroundColor: Colors.grey.shade400,
+        valueColor: const AlwaysStoppedAnimation<Color>(Colors.blueAccent),
+        value: _timeLeft / 10, // Progress based on the time left
+      ),
     );
   }
 }
+

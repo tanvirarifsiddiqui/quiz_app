@@ -13,7 +13,7 @@ class _MainMenuState extends State<MainMenu> {
   @override
   void initState() {
     super.initState();
-    _loadHighScore();
+    _loadHighScore(); //loading previously stored thigh score by using shared preference
   }
 
   // Load high score from shared preferences

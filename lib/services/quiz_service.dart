@@ -4,7 +4,7 @@ import '../data/questions.dart';
 import '../models/question_model.dart';
 
 class QuizService {
-  static const String _url = 'https://herosapp.nyc3.digitaloceanspaces.com/quiz.json';
+  static const String _url = 'https://herosapp.nyc3.digitaloceanspaces.com/quiz.json'; //fetching json data by using provided link
 
   static Future<void> fetchQuestions() async {
     final response = await http.get(Uri.parse(_url));

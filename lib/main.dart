@@ -13,7 +13,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-    ///fetching quiz json data
+    ///fetching quiz json data and storing as a global list of question object
     QuizService.fetchQuestions();
     return MaterialApp(
       debugShowCheckedModeBanner: false,
