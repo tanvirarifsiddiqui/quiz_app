@@ -54,7 +54,7 @@ class _MainMenuState extends State<MainMenu> {
                     MaterialPageRoute(builder: (context) => QuestionAnswerPage()),
                   );
                 },
-                child: Text('Start New Game', style: TextStyle(color: Colors.white),),
+                child: Text('Start New Game', style: TextStyle(color: Colors.white, fontSize: 16),),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue[400], // Sky blue color for button
                 ),

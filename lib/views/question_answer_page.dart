@@ -67,7 +67,7 @@ class _QuestionAnswerPageState extends State<QuestionAnswerPage> {
   Widget build(BuildContext context) {
     Question currentQuestion = questions[currentQuestionIndex];
     return Scaffold(
-      backgroundColor: Colors.blue.shade800,
+      backgroundColor: Colors.blue.shade700,
       appBar: AppBar(
         backgroundColor: Colors.blue.shade900,
         iconTheme: IconThemeData(color: Colors.white),  // Set back button color to white
@@ -79,76 +79,100 @@ class _QuestionAnswerPageState extends State<QuestionAnswerPage> {
           ),
         ],
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Card(
-                elevation: 8.0,
-                color: Colors.blue.shade600,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12.0),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: <Widget>[
-                    if (currentQuestion.questionImageUrl != null)
-                      ClipRRect(
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(16.0),
-                          topRight: Radius.circular(16.0),
-                        ),
-                        child: Image.network(
-                          currentQuestion.questionImageUrl!,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Text(
-                        currentQuestion.questionText,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20.0,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Card(
+            elevation: 8.0,
+            color: Colors.blue.shade800,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12.0),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                if (currentQuestion.questionImageUrl != null)
+                  ClipRRect(
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(16.0),
+                      topRight: Radius.circular(16.0),
                     ),
-                    Divider(height: 0),
-                    SizedBox(height: 10),
-                    ...currentQuestion.answers.keys.map((answer) {
-                      return Container(
-                        // padding: EdgeInsets.all(0),
-                        margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.white.withOpacity(0.5)),
-                          color: answered
-                              ? (answer == selectedAnswer
-                              ? (answer == currentQuestion.correctAnswer ? Colors.green.withOpacity(0.7) : Colors.red.withOpacity(0.7))
-                              : (answer == currentQuestion.correctAnswer ? Colors.green.withOpacity(0.7) : null))
-                              : Colors.blueAccent,
-                        ),
-                        child: ListTile(
-                          title: Center(
+                    child: Image.network(
+                      currentQuestion.questionImageUrl!,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+
+                ///question ans score section
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Table(
+                    columnWidths: {
+                      0: FlexColumnWidth(3),
+                      1: FlexColumnWidth(1),
+                    },
+                    children: [
+                      TableRow(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8.0),
                             child: Text(
-                              currentQuestion.answers[answer]!,
-                              style: TextStyle(color: Colors.white, fontSize: 20),
+                              currentQuestion.questionText,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 20.0,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
-                          onTap: () => _answerQuestion(answer),
-                        ),
-                      );
-
-                    }).toList(),
-                  ],
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8.0),
+                            child: Text(
+                              'Score\n${currentQuestion.score}',
+                              textAlign: TextAlign.right,
+                              style: TextStyle(
+                                color: Colors.yellow,
+                                fontSize: 16.0,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-              ),
+
+                Divider(height: 0),
+                SizedBox(height: 10),
+                ...currentQuestion.answers.keys.map((answer) {
+                  return Container(
+                    // padding: EdgeInsets.all(0),
+                    margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.white.withOpacity(0.5)),
+                      color: answered
+                          ? (answer == selectedAnswer
+                          ? (answer == currentQuestion.correctAnswer ? Colors.green.withOpacity(0.7) : Colors.red.withOpacity(0.7))
+                          : (answer == currentQuestion.correctAnswer ? Colors.green.withOpacity(0.7) : null))
+                          : Colors.blue.shade900,
+                    ),
+                    child: ListTile(
+                      title: Center(
+                        child: Text(
+                          currentQuestion.answers[answer]!,
+                          style: TextStyle(color: Colors.white, fontSize: 20),
+                        ),
+                      ),
+                      onTap: () => _answerQuestion(answer),
+                    ),
+                  );
+
+                }).toList()..shuffle(),
+              ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }

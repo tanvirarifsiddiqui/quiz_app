@@ -15,4 +15,5 @@ class QuizService {
       throw Exception('Failed to load questions');
     }
   }
+
 }
